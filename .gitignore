@@ -1,0 +1,5 @@
+# Ignore files and folders
+token_access.txt
+.env
+.cache/
+logs/

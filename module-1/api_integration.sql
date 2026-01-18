@@ -10,9 +10,11 @@ CREATE OR REPLACE SECRET course_repo.public.github_pat
   -- How to set up a GitHub personal access token: 
   -- link: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
   -- profile -> setting -> developer settings 
-  -- -> personal access tokens -> fine grain tokens 
+  -- -> personal access tokens -> fine-grained tokens 
   -- -> generate new token -> add name for token 
   -- Repository: let all access -> expiration -> select scopes (repo)
+  -- Repository permissions: contents: read and write
+  -- Generate token and copy it to the PASSWORD field above
 
 
 -- Create the API integration

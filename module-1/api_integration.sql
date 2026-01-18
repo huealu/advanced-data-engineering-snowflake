@@ -5,8 +5,15 @@ USE SCHEMA public;
 -- Create credentials
 CREATE OR REPLACE SECRET course_repo.public.github_pat
   TYPE = password
-  USERNAME = ''
-  PASSWORD = '';
+  USERNAME = 'huealu'  -- Your GitHub username
+  PASSWORD = ''; -- Your GitHub personal access token
+  -- How to set up a GitHub personal access token: 
+  -- link: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
+  -- profile -> setting -> developer settings 
+  -- -> personal access tokens -> fine grain tokens 
+  -- -> generate new token -> add name for token 
+  -- Repository: let all access -> expiration -> select scopes (repo)
+
 
 -- Create the API integration
 CREATE OR REPLACE API INTEGRATION

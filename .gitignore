@@ -3,3 +3,6 @@ token_access.txt
 .env
 .cache/
 logs/
+
+# Ignore venv
+snowflake_venv/

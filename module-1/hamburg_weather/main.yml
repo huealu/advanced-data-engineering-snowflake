@@ -1,5 +1,7 @@
 name: Deploy Templatized Data Environment
 
+# The workflow is triggered on PR merge to staging or main, 
+# or direct push to those branches
 on:
   pull_request:
     types: [closed]
@@ -17,6 +19,7 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
 
+    # Develop into Snowflake using connection secrets
     env:
       # Read connection secret
       SNOWFLAKE_CONNECTIONS_ADVANCED_DATA_ENGINEERING_SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -29,6 +32,11 @@ jobs:
         uses: actions/checkout@v4
 
       # Determine environment based on target branch
+      # Set up environment variable 
+      # based on which branch merge to 
+      # these variables have to be matched with 
+      # environment has been set up in Snowflake
+      # this helps workflow to deploy into correct environment in Snowflake
       - name: Set environment
         id: set_env
         run: |

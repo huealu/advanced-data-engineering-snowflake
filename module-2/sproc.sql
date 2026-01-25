@@ -3,6 +3,10 @@ USE DATABASE staging_tasty_bytes;
 USE SCHEMA raw_pos;
 
 -- Configure logging level:
+ALTER ACCOUNT SET LOG_LEVEL = "INFO";
+
+-- Configure traces:
+ALTER SESSION SET TRACE_LEVEL = ALWAYS;
 
 -- Create the stored procedure, define its logic with Snowpark for Python, write sales to raw_pos.daily_sales_hamburg_t
 CREATE OR REPLACE PROCEDURE staging_tasty_bytes.raw_pos.process_order_headers_stream()
@@ -10,24 +14,44 @@ CREATE OR REPLACE PROCEDURE staging_tasty_bytes.raw_pos.process_order_headers_st
   LANGUAGE PYTHON
   RUNTIME_VERSION = '3.10'
   HANDLER ='process_order_headers_stream'
-  PACKAGES = ('snowflake-snowpark-python')
+  PACKAGES = ('snowflake-snowpark-python', 'snowflake-telemetry-python') -- Add telemetry package for traces.
 AS
 $$
 import snowflake.snowpark.functions as F
 from snowflake.snowpark import Session
 import logging
+# import telemetry module and uuid for trace IDs 
+# uuid is a universally unique identifier useful for tracing
+from snowflake import telemetry
+import uuid 
 
 def process_order_headers_stream(session: Session) -> float:
+    # Create `logger` instance to log messages
     logger = logging.getLogger('order_headers_stream_sproc')
+
+    # Generate trace ID for this execution
+    trace_id = str(uuid.uuid4())
     
     # Log procedure start:
-    
+    logger.info("Starting process_order_headers_stream stored procedure")
+
+    # Set initial span attributes for the entire procedure:
+    telemetry.set_span_attribute("procedure", "process_order_headers_stream")
     
     try:
+        # Begin straem query span:
+        telemetry.set_span_attribute("process_step", "query_stream")
+        telemetry.add_event("query_begin", {"description": "Starting query order_header_stream"})
+
+
         # Query the stream
         logger.info("Querying order_header_stream for new records")
         recent_orders = session.table("order_header_stream").filter(F.col("METADATA$ACTION") == "INSERT")
         
+        # Record query completion event:
+        telemetry.add_event("query_complete", {"descrition": "Completed querying order_header_stream"})
+
+
         # Look up location of the orders in the stream using the LOCATIONS table
         logger.info("Filtering orders for Hamburg, Germany")
         locations = session.table("location")
@@ -41,6 +65,7 @@ def process_order_headers_stream(session: Session) -> float:
         
         # Log the count of filtered records:
         hamburg_count = hamburg_orders.count()
+        logger.info(f"Found {hamburg_count} new orders for Hamburg, Germany")
         
         
         '''
@@ -61,6 +86,7 @@ def process_order_headers_stream(session: Session) -> float:
         daily_sales.write.mode("append").save_as_table("raw_pos.daily_sales_hamburg_t")
         '''
         # Log successful completion:
+        logger.info("Successfully processed and wrote daily sales for Hamburg, Germany")
         
         return "Daily sales for Hamburg, Germany have been successfully written to raw_pos.daily_sales_hamburg_t"
     

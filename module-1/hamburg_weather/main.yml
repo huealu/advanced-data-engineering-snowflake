@@ -53,6 +53,7 @@ jobs:
             exit 1
           fi
 
+  
       # Install Snowflake CLI GitHub Action and point to config file
       - name: Install SnowflakeCLI
         uses: snowflakedb/snowflake-cli-action@v1.5
@@ -69,7 +70,7 @@ jobs:
         run: |
           # Export TARGET_BRANCH for use in this step
           echo "Using branch: ${GITHUB_REF_NAME}"
-          snow git execute @advanced_data_engineering_snowflake/branches/FIX-ME/module-1/hamburg_weather/pipeline/data/ \
-          -D "env='${{  }}'" \
+          snow git execute @advanced_data_engineering_snowflake/branches/${GITHUB_REF_NAME}/module-1/hamburg_weather/pipeline/data/ \
+          -D "env='${{ env.DEPLOY_ENV }}'" \
           --database=COURSE_REPO \
           --schema=PUBLIC

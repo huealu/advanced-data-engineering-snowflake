@@ -138,3 +138,5 @@ CALL staging_tasty_bytes.raw_pos.process_order_headers_stream();
 SELECT * FROM pipeline_events;
 
 SELECT * FROM pipeline_events WHERE record_type = 'LOG';
+
+SELECT * FROM pipeline_events WHERE record_type = 'SPAN';
